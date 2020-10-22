@@ -18,8 +18,10 @@ class Classroom{
         newStudent.joinClass(this);
     }
 
-    public void newAssignment(String name, int maxScore){
-        assignments.add(new Assignment(this,name,maxScore));
+    public Assignment newAssignment(String name, int maxScore){
+        Assignment assignment = new Assignment(this,name,maxScore);
+        assignments.add(assignment);
+        return assignment;
     }
 
 }
@@ -27,11 +29,10 @@ class Classroom{
 class Assignment{
     Classroom classroom;
     String name;
-    int maxScore;
-    Grade grade;
+    float maxScore;
     ArrayList<Grade> grades;
 
-    Assignment(Classroom classroom, String name, int maxScore){
+    Assignment(Classroom classroom, String name, float maxScore){
         this.classroom = classroom;
         this.maxScore = maxScore;
         this.name = name;
@@ -39,7 +40,20 @@ class Assignment{
 
     }
 
-    public void gradeAssignment(Student student, int score){
+    public String toString(){
+        return this.name;
+    }
+
+    public String toTable(){
+        StringBuilder theString = new StringBuilder();
+        theString.append("Grades for assignment: ").append(this.name).append("\n-----------------------------------\n");
+        for (Grade grade: grades) {
+            theString.append(grade.toString()).append("\n");
+        }
+        return theString.toString();
+    }
+
+    public void gradeAssignment(Student student, float score){
         grades.add(new Grade(student, score));
     }
 
@@ -52,14 +66,52 @@ class Assignment{
         return null;
     }
 
-    class Grade{
+    private class Grade{
         Student student;
-        int score;
-        int maxScore = Assignment.this.maxScore;
+        float score;
+        float maxScore = Assignment.this.maxScore;
 
-        Grade(Student student, int score){
+        Grade(Student student, float score){
             this.student = student;
             this.score = score;
+        }
+
+        public float getPercentage(){
+            return this.score/this.maxScore;
+        }
+
+        private String getLetter(){
+            String gradeValue;
+            if(this.getPercentage() > 95){
+                gradeValue = "A";
+            }else if(this.getPercentage() > 90) {
+                gradeValue = "A-";
+            }else if(this.getPercentage() > 86.5) {
+                gradeValue = "B+";
+            }else if(this.getPercentage() > 84.5) {
+                gradeValue = "B";
+            }else if(this.getPercentage() > 80) {
+                gradeValue = "B-";
+            }else if(this.getPercentage() > 76.5) { // C
+                gradeValue = "C+";
+            }else if(this.getPercentage() > 74.5) {
+                gradeValue = "C";
+            }else if(this.getPercentage() > 70) {
+                gradeValue = "C-";
+            }else if(this.getPercentage() > 66.5) {
+                gradeValue = "D+";
+            }else if(this.getPercentage() > 64.5) {
+                gradeValue = "D";
+            }else if(this.getPercentage() > 60) {
+                gradeValue = "D-";
+            }else{
+                gradeValue = "E";
+            }
+            return gradeValue;
+        }// Don't ever un collapse this
+
+        public String toString(){
+            return "Student: \"" + this.student + "\" Grade: " + this.getLetter();
         }
     }
 }
@@ -84,6 +136,10 @@ class Student {
     public void joinClass(Classroom classroom){
         classrooms.add(classroom);
     }
+
+    public String toString(){
+        return name;
+    }
 }
 
 public class Main {
@@ -91,9 +147,16 @@ public class Main {
     public static void main(String[] args) {
         // write your code here
         Teacher mrTeacher = new Teacher("Mr. Teacher");
-        Student lazyboi = new Student("Lazy Boi");
         Classroom newClassroom = new Classroom(mrTeacher);
-        newClassroom.addStudent(lazyboi);
+        for (int i = 0; i < 50; i++) {
+            Student newStudent = new Student("Lazy Boi# " + i);
+            newClassroom.addStudent(newStudent);
+        }
+        Assignment newAssignment = newClassroom.newAssignment("Test Assignment",100);
+        for (Student student: newAssignment.classroom.students) {
+            newAssignment.gradeAssignment(student, 67);
+        }
+        System.out.println(newAssignment.toTable());
     }
 }
 
